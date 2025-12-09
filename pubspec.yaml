@@ -1,0 +1,47 @@
+name: manager_web
+description: "مدير - منصة الاستلامات الموحدة"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/logo.png
+  
+  fonts:
+    - family: Tajawal
+      fonts:
+        - asset: assets/Tajawal/Tajawal-ExtraLight.ttf
+          weight: 200
+        - asset: assets/Tajawal/Tajawal-Light.ttf
+          weight: 300
+        - asset: assets/Tajawal/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/Tajawal/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/Tajawal/Tajawal-Bold.ttf
+          weight: 700
+        - asset: assets/Tajawal/Tajawal-ExtraBold.ttf
+          weight: 800
+        - asset: assets/Tajawal/Tajawal-Black.ttf
+          weight: 900
