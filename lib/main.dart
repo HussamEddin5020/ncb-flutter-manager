@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:manager_web/screens/login_screen.dart';
 import 'package:manager_web/screens/dashboard_screen.dart';
 import 'package:manager_web/services/api_service.dart';
+import 'package:manager_web/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -82,27 +83,7 @@ class _MyAppState extends State<MyApp> {
         );
       },
 
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 238, 239, 237),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF2F2F7),
-        cardTheme: CardThemeData(
-          color: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: EdgeInsets.zero,
-        ),
-        listTileTheme: const ListTileThemeData(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        dividerColor: Colors.transparent,
-        fontFamily: 'Tajawal',
-      ),
+      theme: AppTheme.lightTheme,
 
       home: _isCheckingAuth 
           ? const Scaffold(

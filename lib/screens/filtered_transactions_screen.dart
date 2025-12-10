@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:manager_web/models/customer.dart';
 import 'package:manager_web/models/transaction.dart';
-import 'package:manager_web/screens/login_screen.dart';
-import 'package:manager_web/screens/employees_management_screen.dart';
-import 'package:manager_web/screens/branches_management_screen.dart';
+import 'package:manager_web/screens/dashboard_screen.dart';
 import 'package:manager_web/widgets/powered_by_cactus.dart';
+import 'package:manager_web/widgets/ios_grouped_card.dart';
+import 'package:manager_web/widgets/ios_section_header.dart';
+import 'package:manager_web/theme/app_theme.dart';
 import 'package:manager_web/services/api_service.dart';
 
 class CompletedTransaction {
@@ -42,6 +43,7 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
   List<CompletedTransaction> _allTransactions = [];
   List<CompletedTransaction> _filteredTransactions = [];
   bool _isLoading = true;
+  bool _showFilters = false; // Control filters visibility
 
   // Filter controllers
   final TextEditingController _phoneController = TextEditingController();
@@ -153,8 +155,15 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -310,8 +319,15 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -378,191 +394,147 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
       context: context,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         ),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.52, // تقليل العرض بمقدار 35% (من 80% إلى 52%)
+          width: MediaQuery.of(context).size.width * 0.6,
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
           ),
-          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  const Text(
-                    'تفاصيل المعاملات',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Customer Info
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F2F7),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(AppTheme.spacing20),
+                child: Row(
                   children: [
-                    _buildDetailRow('الاسم', transaction.customer.name),
-                    const SizedBox(height: 8),
-                    _buildDetailRow('رقم الهاتف', transaction.customer.phoneNumber),
-                    const SizedBox(height: 8),
-                    _buildDetailRow('رقم الحساب', transaction.customer.accountNumber),
-                    const SizedBox(height: 8),
-                    _buildDetailRow('رقم جواز السفر', transaction.customer.passportNumber),
-                    if (transaction.transactionNumber != null) ...[
-                      const SizedBox(height: 8),
-                      _buildDetailRow('رقم المعاملة', transaction.transactionNumber!),
-                    ],
-                    const SizedBox(height: 8),
-                    _buildDetailRow(
-                      'تاريخ الإنجاز',
-                      dateFormat.format(transaction.completedDate),
+                    Text(
+                      'تفاصيل المعاملات',
+                      style: AppTheme.title2.copyWith(color: AppTheme.label),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      color: AppTheme.secondaryLabel,
                     ),
                   ],
                 ),
               ),
-              // Signature and Passport Image Buttons
-              if (transaction.signatureBase64 != null || transaction.passportImageBase64 != null) ...[
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    if (transaction.signatureBase64 != null)
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _showImageDialog(
-                            context,
-                            transaction.signatureBase64!,
-                            'التوقيع',
-                          ),
-                          icon: const Icon(Icons.draw, size: 18),
-                          label: const Text('عرض التوقيع'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1a5d2e),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    if (transaction.signatureBase64 != null && transaction.passportImageBase64 != null)
-                      const SizedBox(width: 8),
-                    if (transaction.passportImageBase64 != null)
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _showImageDialog(
-                            context,
-                            transaction.passportImageBase64!,
-                            'صورة جواز السفر',
-                          ),
-                          icon: const Icon(Icons.credit_card, size: 18),
-                          label: const Text('صورة الجواز'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1a5d2e),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 16),
-              const Text(
-                'المعاملات:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Tajawal',
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Transactions List
+              const Divider(height: 1),
+              // Content
               Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: transaction.transactions.length,
-                  itemBuilder: (context, index) {
-                    final t = transaction.transactions[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppTheme.spacing20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Customer Info Card
+                      IOSInsetGroupedCard(
                         children: [
-                          Icon(
-                            _getTransactionTypeIcon(t.type),
-                            size: 24,
-                            color: const Color(0xFF1a5d2e),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getTransactionTypeName(t.type),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                    fontFamily: 'Tajawal',
-                                  ),
-                                ),
-                                if (t.description.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    t.description,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                      fontFamily: 'Tajawal',
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                          _buildDetailRow('الاسم', transaction.customer.name),
+                          _buildDetailRow('رقم الهاتف', transaction.customer.phoneNumber),
+                          _buildDetailRow('رقم الحساب', transaction.customer.accountNumber),
+                          _buildDetailRow('رقم جواز السفر', transaction.customer.passportNumber),
+                          if (transaction.transactionNumber != null)
+                            _buildDetailRow('رقم المعاملة', transaction.transactionNumber!),
+                          _buildDetailRow(
+                            'تاريخ الإنجاز',
+                            dateFormat.format(transaction.completedDate),
                           ),
                         ],
                       ),
-                    );
-                  },
+                      // Signature and Passport Buttons
+                      if (transaction.signatureBase64 != null || transaction.passportImageBase64 != null) ...[
+                        const SizedBox(height: AppTheme.spacing16),
+                        Row(
+                          children: [
+                            if (transaction.signatureBase64 != null)
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _showImageDialog(
+                                    context,
+                                    transaction.signatureBase64!,
+                                    'التوقيع',
+                                  ),
+                                  icon: const Icon(Icons.draw, size: 18),
+                                  label: Text('عرض التوقيع', style: AppTheme.headline.copyWith(color: Colors.white)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.systemBlue,
+                                    padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing12),
+                                  ),
+                                ),
+                              ),
+                            if (transaction.signatureBase64 != null && transaction.passportImageBase64 != null)
+                              const SizedBox(width: AppTheme.spacing12),
+                            if (transaction.passportImageBase64 != null)
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _showImageDialog(
+                                    context,
+                                    transaction.passportImageBase64!,
+                                    'صورة جواز السفر',
+                                  ),
+                                  icon: const Icon(Icons.credit_card, size: 18),
+                                  label: Text('صورة الجواز', style: AppTheme.headline.copyWith(color: Colors.white)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.systemBlue,
+                                    padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing12),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                      // Transactions Section
+                      const SizedBox(height: AppTheme.spacing24),
+                      Text(
+                        'المعاملات',
+                        style: AppTheme.title3.copyWith(color: AppTheme.label),
+                      ),
+                      const SizedBox(height: AppTheme.spacing12),
+                      IOSInsetGroupedCard(
+                        children: transaction.transactions.map((t) {
+                          return IOSListRow(
+                            leading: Icon(
+                              _getTransactionTypeIcon(t.type),
+                              color: AppTheme.systemBlue,
+                            ),
+                            title: Text(
+                              _getTransactionTypeName(t.type),
+                              style: AppTheme.body.copyWith(color: AppTheme.label),
+                            ),
+                            subtitle: t.description.isNotEmpty
+                                ? Text(
+                                    t.description,
+                                    style: AppTheme.footnote.copyWith(color: AppTheme.secondaryLabel),
+                                  )
+                                : null,
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1a5d2e),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              // Footer
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(AppTheme.spacing16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.systemBlue,
+                      padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing12),
                     ),
-                  ),
-                  child: const Text(
-                    'إغلاق',
-                    style: TextStyle(fontFamily: 'Tajawal'),
+                    child: Text(
+                      'إغلاق',
+                      style: AppTheme.headline.copyWith(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -574,27 +546,24 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-            fontFamily: 'Tajawal',
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
           ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-            fontFamily: 'Tajawal',
+          Text(
+            value,
+            style: AppTheme.body.copyWith(
+              color: AppTheme.label,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -627,52 +596,65 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
       showDialog(
         context: context,
         builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
           child: Container(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.9,
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
             ),
-            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Tajawal',
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing20),
+                  child: Row(
+                    children: [
+                      Text(
+                        title,
+                        style: AppTheme.title2.copyWith(color: AppTheme.label),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                        color: AppTheme.secondaryLabel,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const Divider(height: 1),
+                // Image
                 Expanded(
-                  child: Center(
-                    child: Image.memory(
-                      imageBytes,
-                      fit: BoxFit.contain,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppTheme.spacing20),
+                    child: Center(
+                      child: Image.memory(
+                        imageBytes,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1a5d2e),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                // Footer
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.systemBlue,
+                        padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing12),
+                      ),
+                      child: Text(
+                        'إغلاق',
+                        style: AppTheme.headline.copyWith(color: Colors.white),
+                      ),
                     ),
-                    child: const Text('إغلاق'),
                   ),
                 ),
               ],
@@ -685,12 +667,18 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('خطأ'),
-          content: Text('فشل عرض الصورة: ${e.toString()}'),
+          title: Text('خطأ', style: AppTheme.title3.copyWith(color: AppTheme.label)),
+          content: Text(
+            'فشل عرض الصورة: ${e.toString()}',
+            style: AppTheme.body.copyWith(color: AppTheme.secondaryLabel),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('إغلاق'),
+              child: Text(
+                'إغلاق',
+                style: AppTheme.headline.copyWith(color: AppTheme.systemBlue),
+              ),
             ),
           ],
         ),
@@ -699,384 +687,231 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
   }
 
   Widget _buildFiltersSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'فلاتر البحث',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Tajawal',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        IOSSectionHeader(title: 'فلاتر البحث'),
+        IOSInsetGroupedCard(
+          children: [
+            // Phone Filter
+            TextFormField(
+              controller: _phoneController,
+              style: AppTheme.body.copyWith(color: AppTheme.label),
+              decoration: InputDecoration(
+                labelText: 'رقم الهاتف',
+                hintText: 'ابحث برقم الهاتف',
+                prefixIcon: const Icon(Icons.phone_outlined, color: AppTheme.systemBlue),
+                labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+              ),
+              onChanged: (_) => _applyFilters(),
             ),
-          ),
-          const SizedBox(height: 16),
-          // Filters Row
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              // Phone Filter
-              SizedBox(
-                width: 200,
-                child: TextField(
-                  controller: _phoneController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'رقم الهاتف',
-                    hintText: 'ابحث برقم الهاتف',
-                    prefixIcon: const Icon(Icons.phone_outlined, size: 20),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: true,
-                    fillColor: const Color(0xFFF2F2F7),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    labelStyle: const TextStyle(fontSize: 12, fontFamily: 'Tajawal'),
-                  ),
-                  onChanged: (_) => _applyFilters(),
+            // Account Filter
+            TextFormField(
+              controller: _accountController,
+              style: AppTheme.body.copyWith(color: AppTheme.label),
+              decoration: InputDecoration(
+                labelText: 'رقم الحساب',
+                hintText: 'ابحث برقم الحساب',
+                prefixIcon: const Icon(Icons.account_balance_outlined, color: AppTheme.systemBlue),
+                labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+              ),
+              onChanged: (_) => _applyFilters(),
+            ),
+            // Passport Filter
+            TextFormField(
+              controller: _passportController,
+              style: AppTheme.body.copyWith(color: AppTheme.label),
+              decoration: InputDecoration(
+                labelText: 'رقم جواز السفر',
+                hintText: 'ابحث برقم جواز السفر',
+                prefixIcon: const Icon(Icons.badge_outlined, color: AppTheme.systemBlue),
+                labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+              ),
+              onChanged: (_) => _applyFilters(),
+            ),
+            // Date From
+            IOSListRow(
+              leading: const Icon(Icons.calendar_today_outlined, color: AppTheme.systemBlue),
+              title: Text(
+                _dateFrom == null
+                    ? 'من تاريخ'
+                    : DateFormat('yyyy-MM-dd').format(_dateFrom!),
+                style: AppTheme.body.copyWith(
+                  color: _dateFrom == null ? AppTheme.tertiaryLabel : AppTheme.label,
                 ),
               ),
-              // Account Filter
-              SizedBox(
-                width: 200,
-                child: TextField(
-                  controller: _accountController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'رقم الحساب',
-                    hintText: 'ابحث برقم الحساب',
-                    prefixIcon: const Icon(Icons.account_balance_outlined, size: 20),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: true,
-                    fillColor: const Color(0xFFF2F2F7),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    labelStyle: const TextStyle(fontSize: 12, fontFamily: 'Tajawal'),
-                  ),
-                  onChanged: (_) => _applyFilters(),
+              trailing: const Icon(Icons.chevron_left, color: AppTheme.tertiaryLabel),
+              onTap: () => _selectDate(context, true),
+            ),
+            // Date To
+            IOSListRow(
+              leading: const Icon(Icons.calendar_today_outlined, color: AppTheme.systemBlue),
+              title: Text(
+                _dateTo == null
+                    ? 'إلى تاريخ'
+                    : DateFormat('yyyy-MM-dd').format(_dateTo!),
+                style: AppTheme.body.copyWith(
+                  color: _dateTo == null ? AppTheme.tertiaryLabel : AppTheme.label,
                 ),
               ),
-              // Passport Filter
-              SizedBox(
-                width: 200,
-                child: TextField(
-                  controller: _passportController,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    labelText: 'رقم جواز السفر',
-                    hintText: 'ابحث برقم جواز السفر',
-                    prefixIcon: const Icon(Icons.badge_outlined, size: 20),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: true,
-                    fillColor: const Color(0xFFF2F2F7),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    labelStyle: const TextStyle(fontSize: 12, fontFamily: 'Tajawal'),
-                  ),
-                  onChanged: (_) => _applyFilters(),
-                ),
+              trailing: const Icon(Icons.chevron_left, color: AppTheme.tertiaryLabel),
+              onTap: () => _selectDate(context, false),
+            ),
+            // Branch Filter
+            DropdownButtonFormField<int>(
+              initialValue: _selectedBranchId,
+              decoration: InputDecoration(
+                labelText: 'الفرع',
+                hintText: 'اختر الفرع',
+                prefixIcon: const Icon(Icons.business_outlined, color: AppTheme.systemBlue),
+                labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
               ),
-              // Date From
-              SizedBox(
-                width: 180,
-                child: InkWell(
-                  onTap: () => _selectDate(context, true),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F7),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _dateFrom == null
-                                ? 'من تاريخ'
-                                : DateFormat('yyyy-MM-dd').format(_dateFrom!),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _dateFrom == null ? Colors.grey[600] : Colors.black87,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              items: [
+                DropdownMenuItem<int>(
+                  value: null,
+                  child: Text('جميع الفروع', style: AppTheme.body),
                 ),
-              ),
-              // Date To
-              SizedBox(
-                width: 180,
-                child: InkWell(
-                  onTap: () => _selectDate(context, false),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2F2F7),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_outlined, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _dateTo == null
-                                ? 'إلى تاريخ'
-                                : DateFormat('yyyy-MM-dd').format(_dateTo!),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _dateTo == null ? Colors.grey[600] : Colors.black87,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Branch Filter
-              SizedBox(
-                width: 200,
-                child: DropdownButtonFormField<int>(
-                  value: _selectedBranchId,
-                  decoration: InputDecoration(
-                    labelText: 'الفرع',
-                    hintText: 'اختر الفرع',
-                    prefixIcon: const Icon(Icons.business_outlined, size: 20),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: true,
-                    fillColor: const Color(0xFFF2F2F7),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    labelStyle: const TextStyle(fontSize: 12, fontFamily: 'Tajawal'),
-                  ),
-                  items: [
-                    const DropdownMenuItem<int>(
-                      value: null,
-                      child: Text('جميع الفروع'),
-                    ),
-                    ..._branches.map((branch) => DropdownMenuItem<int>(
+                ..._branches.map((branch) => DropdownMenuItem<int>(
                       value: branch['id'] as int,
-                      child: Text(branch['name'] as String),
+                      child: Text(branch['name'] as String, style: AppTheme.body),
                     )),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedBranchId = value;
-                    });
-                    _reloadWithFilters();
-                  },
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedBranchId = value;
+                });
+                _reloadWithFilters();
+              },
+            ),
+            // Clear Button
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing8),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: _clearFilters,
+                  child: Text('مسح الفلاتر', style: AppTheme.headline.copyWith(color: AppTheme.systemRed)),
                 ),
               ),
-              // Clear Button
-              TextButton(
-                onPressed: _clearFilters,
-                child: const Text(
-                  'مسح',
-                  style: TextStyle(fontFamily: 'Tajawal'),
-                ),
-              ),
-            ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 80,
+            color: AppTheme.gray3,
+          ),
+          const SizedBox(height: AppTheme.spacing16),
+          Text(
+            'لا توجد معاملات',
+            style: AppTheme.title3.copyWith(color: AppTheme.secondaryLabel),
+          ),
+          const SizedBox(height: AppTheme.spacing8),
+          Text(
+            'لم يتم العثور على معاملات تطابق الفلاتر المحددة',
+            style: AppTheme.footnote.copyWith(color: AppTheme.tertiaryLabel),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTable() {
-    if (_filteredTransactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 80,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'لا توجد معاملات',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-                fontFamily: 'Tajawal',
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildTransactionCard(CompletedTransaction transaction) {
+    final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+    
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.secondaryBackground,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        boxShadow: AppTheme.subtleShadow,
       ),
-      child: Column(
-        children: [
-          // Table Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF2F2F7),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showTransactionDetails(context, transaction),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacing16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 2,
-                  child: const Text(
-                    'البيانات الأساسية',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: const Text(
-                    'إجمالي المعاملات',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: const Text(
-                    'الإجراءات',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      fontFamily: 'Tajawal',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Table Rows
-          Expanded(
-            child: _filteredTransactions.isEmpty
-                ? const SizedBox.shrink()
-                : ListView.builder(
-                    itemCount: _filteredTransactions.length,
-              itemBuilder: (context, index) {
-                final transaction = _filteredTransactions[index];
-                return Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey[200]!,
-                    width: 0.5,
-                  ),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+                Row(
                   children: [
                     Expanded(
-                      flex: 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             transaction.customer.name,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                              fontFamily: 'Tajawal',
-                            ),
+                            style: AppTheme.headline.copyWith(color: AppTheme.label),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppTheme.spacing4),
                           Text(
-                            '${transaction.customer.phoneNumber} | ${transaction.customer.accountNumber}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                              fontFamily: 'Tajawal',
-                            ),
+                            transaction.customer.phoneNumber,
+                            style: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
                           ),
                         ],
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: Text(
-                          '${transaction.totalTransactions}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                            fontFamily: 'Tajawal',
-                          ),
-                        ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.spacing12,
+                        vertical: AppTheme.spacing8,
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: ElevatedButton(
-                          onPressed: () => _showTransactionDetails(context, transaction),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1a5d2e),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'تفاصيل',
-                            style: TextStyle(fontSize: 12, fontFamily: 'Tajawal'),
-                          ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.systemBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      ),
+                      child: Text(
+                        '${transaction.totalTransactions}',
+                        style: AppTheme.headline.copyWith(
+                          color: AppTheme.systemBlue,
+                          fontSize: 18,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-                );
-              },
+                const SizedBox(height: AppTheme.spacing12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance,
+                      size: 16,
+                      color: AppTheme.secondaryLabel,
+                    ),
+                    const SizedBox(width: AppTheme.spacing8),
+                    Text(
+                      transaction.customer.accountNumber,
+                      style: AppTheme.footnote.copyWith(color: AppTheme.secondaryLabel),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.access_time,
+                      size: 16,
+                      color: AppTheme.secondaryLabel,
+                    ),
+                    const SizedBox(width: AppTheme.spacing8),
+                    Text(
+                      dateFormat.format(transaction.completedDate),
+                      style: AppTheme.footnote.copyWith(color: AppTheme.secondaryLabel),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1084,142 +919,153 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF1a5d2e),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 60,
-                    width: 60,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'لوحة التحكم',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.receipt_long, color: Color(0xFF1a5d2e)),
-              title: const Text('المعاملات المكتملة'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.people, color: Color(0xFF1a5d2e)),
-              title: const Text('إدارة الموظفين'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EmployeesManagementScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.business, color: Color(0xFF1a5d2e)),
-              title: const Text('إدارة الفروع'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BranchesManagementScreen(),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
-              onTap: () async {
-                Navigator.pop(context);
-                await ApiService.clearAll();
-                if (context.mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: AppTheme.primaryBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 70,
-        centerTitle: true,
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 40),
-            Image.asset(
-              'assets/images/logo.png',
-              height: 200,
-              width: 200,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 40),
-          ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            );
+          },
         ),
-        iconTheme: const IconThemeData(color: Colors.black87),
+        title: Text(
+          'المعاملات المكتملة',
+          style: AppTheme.headline.copyWith(color: AppTheme.label),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'تحديث',
-            onPressed: () {
-              _reloadWithFilters();
-            },
+          // Filter Button with colored background
+          Padding(
+            padding: const EdgeInsets.only(left: AppTheme.spacing8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _showFilters = !_showFilters;
+                  });
+                },
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.systemBlue,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  ),
+                  child: Icon(
+                    _showFilters ? Icons.tune : Icons.tune_outlined,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'تسجيل الخروج',
-            onPressed: () async {
-              await ApiService.clearAll();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              }
-            },
+          // Refresh Button with colored background
+          Padding(
+            padding: const EdgeInsets.only(left: AppTheme.spacing8, right: AppTheme.spacing8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _reloadWithFilters,
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppTheme.systemGreen,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  ),
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // Fixed Filters Section
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: _buildFiltersSection(),
-                ),
-                // Table Section
-                Expanded(
-                  child: _buildTable(),
-                ),
-                const PoweredByCactus(),
-              ],
+          : RefreshIndicator(
+              onRefresh: _reloadWithFilters,
+              child: CustomScrollView(
+                slivers: [
+                  // Filters Section (Collapsible with Animation)
+                  SliverToBoxAdapter(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, -0.3),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                            reverseCurve: Curves.easeInCubic,
+                          )),
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: _showFilters
+                          ? Padding(
+                              key: const ValueKey('filters'),
+                              padding: const EdgeInsets.only(
+                                top: AppTheme.spacing8,
+                                bottom: AppTheme.spacing8,
+                              ),
+                              child: _buildFiltersSection(),
+                            )
+                          : const SizedBox(
+                              key: ValueKey('empty'),
+                              height: AppTheme.spacing16,
+                            ),
+                    ),
+                  ),
+                  // Transactions List
+                  if (_filteredTransactions.isEmpty)
+                    SliverFillRemaining(
+                      child: _buildEmptyState(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        top: _showFilters ? AppTheme.spacing8 : AppTheme.spacing16,
+                        left: AppTheme.spacing16,
+                        right: AppTheme.spacing16,
+                        bottom: AppTheme.spacing24,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final transaction = _filteredTransactions[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppTheme.spacing8,
+                              ),
+                              child: _buildTransactionCard(transaction),
+                            );
+                          },
+                          childCount: _filteredTransactions.length,
+                        ),
+                      ),
+                    ),
+                  // Powered by Cactus
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppTheme.spacing16),
+                      child: PoweredByCactus(),
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }

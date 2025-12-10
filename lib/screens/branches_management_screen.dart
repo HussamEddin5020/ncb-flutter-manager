@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:manager_web/services/api_service.dart';
+import 'package:manager_web/theme/app_theme.dart';
 
 class Branch {
   final int id;
@@ -74,7 +75,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'فشل جلب الفروع'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -86,8 +91,15 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -103,88 +115,151 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('إضافة فرع جديد'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'اسم الفرع',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'يرجى إدخال اسم الفرع';
-                    }
-                    return null;
-                  },
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.5,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(AppTheme.spacing20),
+                child: Row(
+                  children: [
+                    Text(
+                      'إضافة فرع جديد',
+                      style: AppTheme.title2.copyWith(color: AppTheme.label),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                      color: AppTheme.secondaryLabel,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: codeController,
-                  decoration: const InputDecoration(
-                    labelText: 'رمز الفرع',
-                    hintText: 'مثل: BR001',
-                    border: OutlineInputBorder(),
+              ),
+              const Divider(height: 1),
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppTheme.spacing20),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: nameController,
+                          textDirection: TextDirection.rtl,
+                          style: AppTheme.body.copyWith(color: AppTheme.label),
+                          decoration: InputDecoration(
+                            labelText: 'اسم الفرع',
+                            labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'يرجى إدخال اسم الفرع';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppTheme.spacing16),
+                        TextFormField(
+                          controller: codeController,
+                          textDirection: TextDirection.rtl,
+                          style: AppTheme.body.copyWith(color: AppTheme.label),
+                          decoration: InputDecoration(
+                            labelText: 'رمز الفرع',
+                            hintText: 'مثل: BR001',
+                            labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'يرجى إدخال رمز الفرع';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppTheme.spacing16),
+                        TextFormField(
+                          controller: addressController,
+                          textDirection: TextDirection.rtl,
+                          style: AppTheme.body.copyWith(color: AppTheme.label),
+                          decoration: InputDecoration(
+                            labelText: 'العنوان (اختياري)',
+                            labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                          ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: AppTheme.spacing16),
+                        TextFormField(
+                          controller: phoneController,
+                          textDirection: TextDirection.rtl,
+                          keyboardType: TextInputType.phone,
+                          style: AppTheme.body.copyWith(color: AppTheme.label),
+                          decoration: InputDecoration(
+                            labelText: 'الهاتف (اختياري)',
+                            labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'يرجى إدخال رمز الفرع';
-                    }
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'العنوان (اختياري)',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
+              ),
+              // Footer
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(AppTheme.spacing16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'إلغاء',
+                        style: AppTheme.headline.copyWith(color: AppTheme.systemBlue),
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.spacing8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          Navigator.pop(context);
+                          await _createBranch(
+                            name: nameController.text.trim(),
+                            code: codeController.text.trim(),
+                            address: addressController.text.trim().isEmpty
+                                ? null
+                                : addressController.text.trim(),
+                            phone: phoneController.text.trim().isEmpty
+                                ? null
+                                : phoneController.text.trim(),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.systemBlue,
+                      ),
+                      child: Text(
+                        'إضافة',
+                        style: AppTheme.headline.copyWith(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'الهاتف (اختياري)',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context);
-                await _createBranch(
-                  name: nameController.text.trim(),
-                  code: codeController.text.trim(),
-                  address: addressController.text.trim().isEmpty
-                      ? null
-                      : addressController.text.trim(),
-                  phone: phoneController.text.trim().isEmpty
-                      ? null
-                      : phoneController.text.trim(),
-                );
-              }
-            },
-            child: const Text('إضافة'),
-          ),
-        ],
       ),
     );
   }
@@ -208,7 +283,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'تم إضافة الفرع بنجاح'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
           _loadBranches();
@@ -216,7 +295,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'فشل إضافة الفرع'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -225,8 +308,15 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -365,7 +455,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'تم تحديث الفرع بنجاح'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
           _loadBranches();
@@ -373,7 +467,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'فشل تحديث الفرع'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -382,8 +480,15 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -419,7 +524,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(result['message'] ?? 'تم حذف الفرع بنجاح'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
               ),
             );
             _loadBranches();
@@ -427,7 +536,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(result['message'] ?? 'فشل حذف الفرع'),
-                backgroundColor: Colors.red,
+                backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
               ),
             );
           }
@@ -437,7 +550,11 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('حدث خطأ: ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -448,90 +565,201 @@ class _BranchesManagementScreenState extends State<BranchesManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryBackground,
       appBar: AppBar(
-        title: const Text('إدارة الفروع'),
+        title: Text(
+          'إدارة الفروع',
+          style: AppTheme.headline.copyWith(color: AppTheme.label),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _showAddBranchDialog,
+            tooltip: 'إضافة فرع',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _branches.isEmpty
-              ? Center(
+          : RefreshIndicator(
+              onRefresh: _loadBranches,
+              child: _branches.isEmpty
+                  ? _buildEmptyState()
+                  : CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.only(
+                            top: AppTheme.spacing8,
+                            bottom: AppTheme.spacing24,
+                          ),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final branch = _branches[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppTheme.spacing16,
+                                    vertical: AppTheme.spacing4,
+                                  ),
+                                  child: _buildBranchCard(branch),
+                                );
+                              },
+                              childCount: _branches.length,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.business_outlined,
+            size: 80,
+            color: AppTheme.gray3,
+          ),
+          const SizedBox(height: AppTheme.spacing16),
+          Text(
+            'لا توجد فروع',
+            style: AppTheme.title3.copyWith(color: AppTheme.secondaryLabel),
+          ),
+          const SizedBox(height: AppTheme.spacing8),
+          Text(
+            'ابدأ بإضافة فرع جديد',
+            style: AppTheme.footnote.copyWith(color: AppTheme.tertiaryLabel),
+          ),
+          const SizedBox(height: AppTheme.spacing24),
+          ElevatedButton.icon(
+            onPressed: _showAddBranchDialog,
+            icon: const Icon(Icons.add),
+            label: Text('إضافة فرع جديد', style: AppTheme.headline.copyWith(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.systemBlue,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacing24,
+                vertical: AppTheme.spacing12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBranchCard(Branch branch) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppTheme.spacing8),
+      decoration: BoxDecoration(
+        color: AppTheme.secondaryBackground,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        boxShadow: AppTheme.subtleShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacing16),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: branch.isActive
+                      ? AppTheme.systemGreen
+                      : AppTheme.gray3,
+                  child: const Icon(Icons.business, color: Colors.white),
+                ),
+                const SizedBox(width: AppTheme.spacing16),
+                Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.business, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'لا توجد فروع',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      Text(
+                        branch.name,
+                        style: AppTheme.headline.copyWith(
+                          color: branch.isActive ? AppTheme.label : AppTheme.secondaryLabel,
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _showAddBranchDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('إضافة فرع جديد'),
+                      const SizedBox(height: AppTheme.spacing4),
+                      Text(
+                        branch.code,
+                        style: AppTheme.footnote.copyWith(color: AppTheme.secondaryLabel),
+                      ),
+                      if (branch.address != null) ...[
+                        const SizedBox(height: AppTheme.spacing4),
+                        Text(
+                          branch.address!,
+                          style: AppTheme.footnote.copyWith(color: AppTheme.tertiaryLabel),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: AppTheme.spacing4),
+                      Row(
+                        children: [
+                          Icon(
+                            branch.isActive ? Icons.check_circle : Icons.cancel,
+                            size: 16,
+                            color: branch.isActive
+                                ? AppTheme.systemGreen
+                                : AppTheme.systemRed,
+                          ),
+                          const SizedBox(width: AppTheme.spacing4),
+                          Text(
+                            branch.isActive ? 'نشط' : 'غير نشط',
+                            style: AppTheme.footnote.copyWith(
+                              color: branch.isActive
+                                  ? AppTheme.systemGreen
+                                  : AppTheme.systemRed,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadBranches,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _branches.length,
-                    itemBuilder: (context, index) {
-                      final branch = _branches[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: branch.isActive
-                                ? Colors.green
-                                : Colors.grey,
-                            child: const Icon(Icons.business, color: Colors.white),
-                          ),
-                          title: Text(
-                            branch.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: branch.isActive ? null : Colors.grey,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('الرمز: ${branch.code}'),
-                              if (branch.address != null)
-                                Text('العنوان: ${branch.address}'),
-                              if (branch.phone != null)
-                                Text('الهاتف: ${branch.phone}'),
-                              if (!branch.isActive)
-                                const Text(
-                                  'غير نشط',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () => _showEditBranchDialog(branch),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _deleteBranch(branch),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddBranchDialog,
-        child: const Icon(Icons.add),
+                PopupMenuButton(
+                  icon: const Icon(Icons.more_vert, color: AppTheme.secondaryLabel),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.edit, size: 20, color: AppTheme.systemBlue),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text('تعديل', style: AppTheme.body),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, size: 20, color: AppTheme.systemRed),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text('حذف', style: AppTheme.body.copyWith(color: AppTheme.systemRed)),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _showEditBranchDialog(branch);
+                    } else if (value == 'delete') {
+                      _deleteBranch(branch);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

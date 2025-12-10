@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manager_web/models/employee.dart';
 import 'package:manager_web/services/api_service.dart';
+import 'package:manager_web/theme/app_theme.dart';
 
 class EmployeesManagementScreen extends StatefulWidget {
   const EmployeesManagementScreen({super.key});
@@ -57,8 +58,15 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message'] ?? 'فشل جلب الموظفين'),
-              backgroundColor: Colors.red,
+              content: Text(
+                result['message'] ?? 'فشل جلب الموظفين',
+                style: AppTheme.body.copyWith(color: Colors.white),
+              ),
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -70,8 +78,15 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -90,165 +105,235 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
     await showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(selectedRole == 'manager' ? 'إضافة مدير جديد' : 'إضافة موظف جديد'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    key: ValueKey('employee_id_$selectedRole'),
-                    controller: employeeIdController,
-                    decoration: InputDecoration(
-                      labelText: selectedRole == 'manager' ? 'رقم المدير' : 'رقم الموظف',
-                      hintText: selectedRole == 'manager' ? 'مثل: MGR002' : 'مثل: EMP002',
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return selectedRole == 'manager' 
-                            ? 'يرجى إدخال رقم المدير' 
-                            : 'يرجى إدخال رقم الموظف';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    key: ValueKey('name_$selectedRole'),
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: selectedRole == 'manager' ? 'اسم المدير' : 'اسم الموظف',
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return selectedRole == 'manager' 
-                            ? 'يرجى إدخال اسم المدير' 
-                            : 'يرجى إدخال اسم الموظف';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    key: ValueKey('password_$selectedRole'),
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'كلمة المرور',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (_) {
-                      if (confirmPasswordController.text.isNotEmpty) {
-                        formKey.currentState?.validate();
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى إدخال كلمة المرور';
-                      }
-                      if (value.length < 6) {
-                        return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    key: ValueKey('confirm_password_$selectedRole'),
-                    controller: confirmPasswordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'تأكيد كلمة المرور',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى تأكيد كلمة المرور';
-                      }
-                      if (value != passwordController.text) {
-                        return 'كلمة المرور غير متطابقة';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'نوع الموظف',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'employee', child: Text('موظف')),
-                      DropdownMenuItem(value: 'manager', child: Text('مدير')),
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.5,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing20),
+                  child: Row(
+                    children: [
+                      Text(
+                        selectedRole == 'manager' ? 'إضافة مدير جديد' : 'إضافة موظف جديد',
+                        style: AppTheme.title2.copyWith(color: AppTheme.label),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        color: AppTheme.secondaryLabel,
+                      ),
                     ],
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedRole = value!;
-                      });
-                    },
                   ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<int>(
-                    value: selectedBranchId,
-                    decoration: const InputDecoration(
-                      labelText: 'الفرع *',
-                      border: OutlineInputBorder(),
+                ),
+                const Divider(height: 1),
+                // Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppTheme.spacing20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            key: ValueKey('employee_id_$selectedRole'),
+                            controller: employeeIdController,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: selectedRole == 'manager' ? 'رقم المدير' : 'رقم الموظف',
+                              hintText: selectedRole == 'manager' ? 'مثل: MGR002' : 'مثل: EMP002',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return selectedRole == 'manager' 
+                                    ? 'يرجى إدخال رقم المدير' 
+                                    : 'يرجى إدخال رقم الموظف';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          TextFormField(
+                            key: ValueKey('name_$selectedRole'),
+                            controller: nameController,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: selectedRole == 'manager' ? 'اسم المدير' : 'اسم الموظف',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return selectedRole == 'manager' 
+                                    ? 'يرجى إدخال اسم المدير' 
+                                    : 'يرجى إدخال اسم الموظف';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          TextFormField(
+                            key: ValueKey('password_$selectedRole'),
+                            controller: passwordController,
+                            obscureText: true,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: 'كلمة المرور',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            onChanged: (_) {
+                              if (confirmPasswordController.text.isNotEmpty) {
+                                formKey.currentState?.validate();
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'يرجى إدخال كلمة المرور';
+                              }
+                              if (value.length < 6) {
+                                return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          TextFormField(
+                            key: ValueKey('confirm_password_$selectedRole'),
+                            controller: confirmPasswordController,
+                            obscureText: true,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: 'تأكيد كلمة المرور',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'يرجى تأكيد كلمة المرور';
+                              }
+                              if (value != passwordController.text) {
+                                return 'كلمة المرور غير متطابقة';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedRole,
+                            decoration: InputDecoration(
+                              labelText: 'نوع الموظف',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            items: const [
+                              DropdownMenuItem(value: 'employee', child: Text('موظف')),
+                              DropdownMenuItem(value: 'manager', child: Text('مدير')),
+                            ],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedRole = value!;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          DropdownButtonFormField<int>(
+                            initialValue: selectedBranchId,
+                            decoration: InputDecoration(
+                              labelText: 'الفرع *',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            items: _branches.map((branch) => DropdownMenuItem<int>(
+                              value: branch['id'] as int,
+                              child: Text(branch['name'] as String, style: AppTheme.body),
+                            )).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedBranchId = value;
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null) {
+                                return 'يرجى اختيار الفرع';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    items: _branches.map((branch) => DropdownMenuItem<int>(
-                      value: branch['id'] as int,
-                      child: Text(branch['name'] as String),
-                    )).toList(),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedBranchId = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'يرجى اختيار الفرع';
-                      }
-                      return null;
-                    },
                   ),
-                ],
-              ),
+                ),
+                // Footer
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'إلغاء',
+                          style: AppTheme.headline.copyWith(color: AppTheme.systemBlue),
+                        ),
+                      ),
+                      const SizedBox(width: AppTheme.spacing8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            if (selectedBranchId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'يرجى اختيار الفرع',
+                                    style: AppTheme.body.copyWith(color: Colors.white),
+                                  ),
+                                  backgroundColor: AppTheme.systemRed,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            Navigator.pop(context);
+                            await _addEmployee(
+                              employeeIdController.text.trim(),
+                              nameController.text.trim(),
+                              passwordController.text,
+                              selectedRole,
+                              selectedBranchId!,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.systemBlue,
+                        ),
+                        child: Text(
+                          'إضافة',
+                          style: AppTheme.headline.copyWith(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إلغاء'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  if (selectedBranchId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('يرجى اختيار الفرع'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  Navigator.pop(context);
-                  await _addEmployee(
-                    employeeIdController.text.trim(),
-                    nameController.text.trim(),
-                    passwordController.text,
-                    selectedRole,
-                    selectedBranchId!,
-                  );
-                }
-              },
-              child: const Text('إضافة'),
-            ),
-          ],
         ),
       ),
     );
@@ -283,7 +368,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'تم إضافة الموظف بنجاح'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
           _loadEmployees();
@@ -291,7 +380,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'فشل إضافة الموظف'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -301,8 +394,15 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -319,90 +419,152 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
     await showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('تعديل بيانات الموظف'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('رقم الموظف: ${employee.employeeId}'),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'اسم الموظف',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'يرجى إدخال اسم الموظف';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'كلمة المرور (اتركه فارغاً إذا لم ترد تغييره)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'نوع الموظف',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'employee', child: Text('موظف')),
-                      DropdownMenuItem(value: 'manager', child: Text('مدير')),
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.5,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing20),
+                  child: Row(
+                    children: [
+                      Text(
+                        'تعديل بيانات الموظف',
+                        style: AppTheme.title2.copyWith(color: AppTheme.label),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        color: AppTheme.secondaryLabel,
+                      ),
                     ],
-                    onChanged: (value) {
-                      setDialogState(() {
-                        selectedRole = value!;
-                      });
-                    },
                   ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text('حساب نشط'),
-                    value: isActive,
-                    onChanged: (value) {
-                      setDialogState(() {
-                        isActive = value;
-                      });
-                    },
+                ),
+                const Divider(height: 1),
+                // Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppTheme.spacing20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'رقم الموظف: ${employee.employeeId}',
+                            style: AppTheme.body.copyWith(color: AppTheme.secondaryLabel),
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          TextFormField(
+                            controller: nameController,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: 'اسم الموظف',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'يرجى إدخال اسم الموظف';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            textDirection: TextDirection.rtl,
+                            style: AppTheme.body.copyWith(color: AppTheme.label),
+                            decoration: InputDecoration(
+                              labelText: 'كلمة المرور (اتركه فارغاً إذا لم ترد تغييره)',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedRole,
+                            decoration: InputDecoration(
+                              labelText: 'نوع الموظف',
+                              labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
+                            ),
+                            items: const [
+                              DropdownMenuItem(value: 'employee', child: Text('موظف')),
+                              DropdownMenuItem(value: 'manager', child: Text('مدير')),
+                            ],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedRole = value!;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: AppTheme.spacing16),
+                          SwitchListTile(
+                            title: Text('حساب نشط', style: AppTheme.body.copyWith(color: AppTheme.label)),
+                            value: isActive,
+                            onChanged: (value) {
+                              setDialogState(() {
+                                isActive = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+                // Footer
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacing16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'إلغاء',
+                          style: AppTheme.headline.copyWith(color: AppTheme.systemBlue),
+                        ),
+                      ),
+                      const SizedBox(width: AppTheme.spacing8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            Navigator.pop(context);
+                            await _updateEmployee(
+                              employee.id,
+                              nameController.text.trim(),
+                              passwordController.text.isEmpty ? null : passwordController.text,
+                              selectedRole,
+                              isActive,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.systemBlue,
+                        ),
+                        child: Text(
+                          'حفظ',
+                          style: AppTheme.headline.copyWith(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إلغاء'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  Navigator.pop(context);
-                  await _updateEmployee(
-                    employee.id,
-                    nameController.text.trim(),
-                    passwordController.text.isEmpty ? null : passwordController.text,
-                    selectedRole,
-                    isActive,
-                  );
-                }
-              },
-              child: const Text('حفظ'),
-            ),
-          ],
         ),
       ),
     );
@@ -437,7 +599,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'تم تحديث الموظف بنجاح'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
           _loadEmployees();
@@ -445,7 +611,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'فشل تحديث الموظف'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -455,8 +625,15 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'حدث خطأ: ${e.toString()}',
+              style: AppTheme.body.copyWith(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.systemRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            ),
           ),
         );
       }
@@ -467,23 +644,35 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف الموظف "${employee.name}"؟'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
+        title: Text('تأكيد الحذف', style: AppTheme.title3.copyWith(color: AppTheme.label)),
+        content: Text(
+          'هل أنت متأكد من حذف الموظف "${employee.name}"؟',
+          style: AppTheme.body.copyWith(color: AppTheme.secondaryLabel),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('إلغاء'),
+            child: Text(
+              'إلغاء',
+              style: AppTheme.headline.copyWith(color: AppTheme.systemBlue),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.systemRed),
+            child: Text(
+              'حذف',
+              style: AppTheme.headline.copyWith(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
 
-    if (confirm == true) {
+    if (confirm == true && mounted) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -500,7 +689,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(result['message'] ?? 'تم حذف الموظف بنجاح'),
-                backgroundColor: Colors.green,
+                backgroundColor: AppTheme.systemGreen,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
               ),
             );
             _loadEmployees();
@@ -508,7 +701,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(result['message'] ?? 'فشل حذف الموظف'),
-                backgroundColor: Colors.red,
+                backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
               ),
             );
           }
@@ -519,7 +716,11 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('حدث خطأ: ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.systemRed,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              ),
             ),
           );
         }
@@ -530,129 +731,193 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryBackground,
       appBar: AppBar(
-        title: const Text('إدارة الموظفين'),
-        backgroundColor: const Color(0xFF1a5d2e),
-        foregroundColor: Colors.white,
+        title: Text(
+          'إدارة الموظفين',
+          style: AppTheme.headline.copyWith(color: AppTheme.label),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _showAddEmployeeDialog,
+            tooltip: 'إضافة موظف',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadEmployees,
               child: _employees.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'لا يوجد موظفين',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ? _buildEmptyState()
+                  : CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.only(
+                            top: AppTheme.spacing8,
+                            bottom: AppTheme.spacing24,
                           ),
-                          const SizedBox(height: 8),
-                          ElevatedButton.icon(
-                            onPressed: _showAddEmployeeDialog,
-                            icon: const Icon(Icons.add),
-                            label: const Text('إضافة موظف جديد'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1a5d2e),
-                              foregroundColor: Colors.white,
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final employee = _employees[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppTheme.spacing16,
+                                    vertical: AppTheme.spacing4,
+                                  ),
+                                  child: _buildEmployeeCard(employee),
+                                );
+                              },
+                              childCount: _employees.length,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people_outline,
+            size: 80,
+            color: AppTheme.gray3,
+          ),
+          const SizedBox(height: AppTheme.spacing16),
+          Text(
+            'لا يوجد موظفين',
+            style: AppTheme.title3.copyWith(color: AppTheme.secondaryLabel),
+          ),
+          const SizedBox(height: AppTheme.spacing8),
+          Text(
+            'ابدأ بإضافة موظف جديد',
+            style: AppTheme.footnote.copyWith(color: AppTheme.tertiaryLabel),
+          ),
+          const SizedBox(height: AppTheme.spacing24),
+          ElevatedButton.icon(
+            onPressed: _showAddEmployeeDialog,
+            icon: const Icon(Icons.add),
+            label: Text('إضافة موظف جديد', style: AppTheme.headline.copyWith(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.systemBlue,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacing24,
+                vertical: AppTheme.spacing12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmployeeCard(Employee employee) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppTheme.spacing8),
+      decoration: BoxDecoration(
+        color: AppTheme.secondaryBackground,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        boxShadow: AppTheme.subtleShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacing16),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: employee.role == 'manager'
+                      ? AppTheme.systemOrange
+                      : AppTheme.systemBlue,
+                  child: Text(
+                    employee.name[0],
+                    style: AppTheme.headline.copyWith(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacing16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        employee.name,
+                        style: AppTheme.headline.copyWith(color: AppTheme.label),
+                      ),
+                      const SizedBox(height: AppTheme.spacing4),
+                      Text(
+                        '${employee.employeeId} • ${employee.roleName}',
+                        style: AppTheme.footnote.copyWith(color: AppTheme.secondaryLabel),
+                      ),
+                      const SizedBox(height: AppTheme.spacing4),
+                      Row(
+                        children: [
+                          Icon(
+                            employee.isActive ? Icons.check_circle : Icons.cancel,
+                            size: 16,
+                            color: employee.isActive
+                                ? AppTheme.systemGreen
+                                : AppTheme.systemRed,
+                          ),
+                          const SizedBox(width: AppTheme.spacing4),
+                          Text(
+                            employee.isActive ? 'نشط' : 'غير نشط',
+                            style: AppTheme.footnote.copyWith(
+                              color: employee.isActive
+                                  ? AppTheme.systemGreen
+                                  : AppTheme.systemRed,
                             ),
                           ),
                         ],
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _employees.length,
-                      itemBuilder: (context, index) {
-                        final employee = _employees[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: employee.role == 'manager'
-                                  ? Colors.orange
-                                  : Colors.blue,
-                              child: Text(
-                                employee.name[0],
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(
-                              employee.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('رقم الموظف: ${employee.employeeId}'),
-                                Text('النوع: ${employee.roleName}'),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      employee.isActive
-                                          ? Icons.check_circle
-                                          : Icons.cancel,
-                                      size: 16,
-                                      color: employee.isActive
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      employee.isActive ? 'نشط' : 'غير نشط',
-                                      style: TextStyle(
-                                        color: employee.isActive
-                                            ? Colors.green
-                                            : Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            trailing: PopupMenuButton(
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.edit, size: 20),
-                                      SizedBox(width: 8),
-                                      Text('تعديل'),
-                                    ],
-                                  ),
-                                ),
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.delete, size: 20, color: Colors.red),
-                                      SizedBox(width: 8),
-                                      Text('حذف', style: TextStyle(color: Colors.red)),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _showEditEmployeeDialog(employee);
-                                } else if (value == 'delete') {
-                                  _deleteEmployee(employee);
-                                }
-                              },
-                            ),
-                          ),
-                        );
-                      },
+                    ],
+                  ),
+                ),
+                PopupMenuButton(
+                  icon: const Icon(Icons.more_vert, color: AppTheme.secondaryLabel),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.edit, size: 20, color: AppTheme.systemBlue),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text('تعديل', style: AppTheme.body),
+                        ],
+                      ),
                     ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, size: 20, color: AppTheme.systemRed),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text('حذف', style: AppTheme.body.copyWith(color: AppTheme.systemRed)),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _showEditEmployeeDialog(employee);
+                    } else if (value == 'delete') {
+                      _deleteEmployee(employee);
+                    }
+                  },
+                ),
+              ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddEmployeeDialog,
-        backgroundColor: const Color(0xFF1a5d2e),
-        child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
       ),
     );
   }
