@@ -103,6 +103,25 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
 
             if (detailsResult['success'] == true && detailsResult['data'] != null) {
               final detail = detailsResult['data'];
+              
+              // Get branch name if branch_id exists
+              String? branchName;
+              if (detail['branch_name'] != null) {
+                branchName = detail['branch_name'];
+              } else if (detail['branch'] != null && detail['branch']['name'] != null) {
+                branchName = detail['branch']['name'];
+              } else if (detail['branch_id'] != null) {
+                // Try to find branch name from _branches list
+                final branchId = int.tryParse(detail['branch_id'].toString());
+                if (branchId != null) {
+                  final branch = _branches.firstWhere(
+                    (b) => b['id'] == branchId,
+                    orElse: () => {},
+                  );
+                  branchName = branch['name'];
+                }
+              }
+              
               final customer = Customer.fromJson({
                 'id': detail['customer_id'],
                 'name': detail['customer_name'] ?? '',
@@ -110,7 +129,7 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
                 'account_number': detail['account_number'] ?? '',
                 'passport_number': detail['passport_number'] ?? '',
                 'branch_id': detail['branch_id'],
-                'branch_name': detail['branch_name'] ?? detail['branch']?['name'],
+                'branch_name': branchName,
               });
 
               final transactions = <Transaction>[];
@@ -269,6 +288,25 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
 
             if (detailsResult['success'] == true && detailsResult['data'] != null) {
               final detail = detailsResult['data'];
+              
+              // Get branch name if branch_id exists
+              String? branchName;
+              if (detail['branch_name'] != null) {
+                branchName = detail['branch_name'];
+              } else if (detail['branch'] != null && detail['branch']['name'] != null) {
+                branchName = detail['branch']['name'];
+              } else if (detail['branch_id'] != null) {
+                // Try to find branch name from _branches list
+                final branchId = int.tryParse(detail['branch_id'].toString());
+                if (branchId != null) {
+                  final branch = _branches.firstWhere(
+                    (b) => b['id'] == branchId,
+                    orElse: () => {},
+                  );
+                  branchName = branch['name'];
+                }
+              }
+              
               final customer = Customer.fromJson({
                 'id': detail['customer_id'],
                 'name': detail['customer_name'] ?? '',
@@ -276,7 +314,7 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
                 'account_number': detail['account_number'] ?? '',
                 'passport_number': detail['passport_number'] ?? '',
                 'branch_id': detail['branch_id'],
-                'branch_name': detail['branch_name'] ?? detail['branch']?['name'],
+                'branch_name': branchName,
               });
 
               final transactions = <Transaction>[];
