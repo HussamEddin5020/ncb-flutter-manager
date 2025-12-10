@@ -5,6 +5,8 @@ class Customer {
   final String accountNumber;
   final String passportNumber;
   final String? email;
+  final int? branchId;
+  final String? branchName;
 
   Customer({
     required this.id,
@@ -13,6 +15,8 @@ class Customer {
     required this.accountNumber,
     required this.passportNumber,
     this.email,
+    this.branchId,
+    this.branchName,
   });
 
   // Convert from API JSON
@@ -24,6 +28,8 @@ class Customer {
       accountNumber: json['account_number'] ?? '',
       passportNumber: json['passport_number'] ?? '',
       email: json['email'],
+      branchId: json['branch_id'] != null ? int.tryParse(json['branch_id'].toString()) : null,
+      branchName: json['branch_name'] ?? json['branch']?['name'],
     );
   }
 }

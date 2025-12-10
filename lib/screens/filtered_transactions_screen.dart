@@ -109,6 +109,8 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
                 'phone_number': detail['phone_number'] ?? '',
                 'account_number': detail['account_number'] ?? '',
                 'passport_number': detail['passport_number'] ?? '',
+                'branch_id': detail['branch_id'],
+                'branch_name': detail['branch_name'] ?? detail['branch']?['name'],
               });
 
               final transactions = <Transaction>[];
@@ -273,6 +275,8 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
                 'phone_number': detail['phone_number'] ?? '',
                 'account_number': detail['account_number'] ?? '',
                 'passport_number': detail['passport_number'] ?? '',
+                'branch_id': detail['branch_id'],
+                'branch_name': detail['branch_name'] ?? detail['branch']?['name'],
               });
 
               final transactions = <Transaction>[];
@@ -438,6 +442,8 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
                           _buildDetailRow('رقم الهاتف', transaction.customer.phoneNumber),
                           _buildDetailRow('رقم الحساب', transaction.customer.accountNumber),
                           _buildDetailRow('رقم جواز السفر', transaction.customer.passportNumber),
+                          if (transaction.customer.branchName != null)
+                            _buildDetailRow('الفرع', transaction.customer.branchName!),
                           if (transaction.transactionNumber != null)
                             _buildDetailRow('رقم المعاملة', transaction.transactionNumber!),
                           _buildDetailRow(
