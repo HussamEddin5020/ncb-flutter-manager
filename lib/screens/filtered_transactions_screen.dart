@@ -759,7 +759,7 @@ class _FilteredTransactionsScreenState extends State<FilteredTransactionsScreen>
             ),
             // Branch Filter
             DropdownButtonFormField<int>(
-              initialValue: _selectedBranchId,
+              value: _selectedBranchId,
               decoration: InputDecoration(
                 labelText: 'الفرع',
                 hintText: 'اختر الفرع',

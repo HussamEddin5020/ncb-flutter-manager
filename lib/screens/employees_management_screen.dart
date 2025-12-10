@@ -233,7 +233,7 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
                           ),
                           const SizedBox(height: AppTheme.spacing16),
                           DropdownButtonFormField<String>(
-                            initialValue: selectedRole,
+                            value: selectedRole,
                             decoration: InputDecoration(
                               labelText: 'نوع الموظف',
                               labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
@@ -250,7 +250,7 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
                           ),
                           const SizedBox(height: AppTheme.spacing16),
                           DropdownButtonFormField<int>(
-                            initialValue: selectedBranchId,
+                            value: selectedBranchId,
                             decoration: InputDecoration(
                               labelText: 'الفرع *',
                               labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
@@ -493,7 +493,7 @@ class _EmployeesManagementScreenState extends State<EmployeesManagementScreen> {
                           ),
                           const SizedBox(height: AppTheme.spacing16),
                           DropdownButtonFormField<String>(
-                            initialValue: selectedRole,
+                            value: selectedRole,
                             decoration: InputDecoration(
                               labelText: 'نوع الموظف',
                               labelStyle: AppTheme.subhead.copyWith(color: AppTheme.secondaryLabel),
